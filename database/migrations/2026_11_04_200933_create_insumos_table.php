@@ -1,0 +1,31 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('insumos', function (Blueprint $table) {
+    $table->id();
+    $table->string('nombre'); // Ej: Bloque de espuma D26, Tela cuerotex
+    $table->decimal('stock_actual', 10, 2)->default(0);
+    $table->decimal('stock_minimo', 10, 2)->default(5);
+    $table->string('unidad_medida'); // Ej: unidades, metros, planchas
+    $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('insumos');
+    }
+};
