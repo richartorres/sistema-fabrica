@@ -14,4 +14,13 @@ class Producto extends Model
                     ->withPivot('cantidad_requerida')
                     ->withTimestamps();
     }
+
+    // Método para calcular el costo total de producción basado en la receta (BOM)
+    public function getCostoProduccionAttribute()
+    {
+        return $this->insumos->sum(function ($insumo) {
+            return $insumo->costo_unitario * $insumo->pivot->cantidad_requerida;
+        });
+    }
+
 }

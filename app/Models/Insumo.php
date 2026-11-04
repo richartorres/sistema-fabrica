@@ -7,7 +7,7 @@ use App\Models\Producto;
 
 class Insumo extends Model
 {
-    protected $fillable = ['nombre', 'stock_actual', 'stock_minimo', 'unidad_medida'];
+    protected $fillable = ['nombre', 'stock_actual', 'stock_minimo', 'costo_unitario', 'unidad_medida'];
 
     public function productos()
     {
