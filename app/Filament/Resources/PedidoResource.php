@@ -145,6 +145,13 @@ class PedidoResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
+                Tables\Actions\Action::make('descargar_pdf')
+            ->label('PDF')
+            ->icon('heroicon-o-document-arrow-down')
+            ->color('success')
+            ->url(fn (Pedido $record): string => route('pedidos.pdf', $record))
+            ->openUrlInNewTab(),
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
