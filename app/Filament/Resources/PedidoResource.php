@@ -152,6 +152,13 @@ class PedidoResource extends Resource
             ->url(fn (Pedido $record): string => route('pedidos.pdf', $record))
             ->openUrlInNewTab(),
 
+            Tables\Actions\Action::make('descargar_tirilla')
+        ->label('Tirilla')
+        ->icon('heroicon-o-receipt-percent')
+        ->color('warning')
+        ->url(fn (Pedido $record): string => route('pedidos.tirilla', $record))
+        ->openUrlInNewTab(),
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

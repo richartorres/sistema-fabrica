@@ -10,3 +10,6 @@ Route::get('/', function () {
 
 Route::get('/pedidos/{pedido}/pdf', [PedidoPdfController::class, 'descargar'])
     ->name('pedidos.pdf');
+    
+    Route::get('/pedidos/{pedido}/tirilla', [PedidoPdfController::class, 'tirilla'])
+    ->name('pedidos.tirilla');
