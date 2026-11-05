@@ -152,14 +152,55 @@ class PedidoResource extends Resource
             ->url(fn (Pedido $record): string => route('pedidos.pdf', $record))
             ->openUrlInNewTab(),
 
-            Tables\Actions\Action::make('descargar_tirilla')
-        ->label('Tirilla')
-        ->icon('heroicon-o-receipt-percent')
-        ->color('warning')
-        ->url(fn (Pedido $record): string => route('pedidos.tirilla', $record))
-        ->openUrlInNewTab(),
+                Tables\Actions\Action::make('descargar_tirilla')
+            ->label('Tirilla')
+            ->icon('heroicon-o-receipt-percent')
+            ->color('warning')
+            ->url(fn (Pedido $record): string => route('pedidos.tirilla', $record))
+            ->openUrlInNewTab(),
 
+            
+
+            Tables\Actions\Action::make('registrar_abono')
+            ->label('Abonar')
+            ->icon('heroicon-o-currency-dollar')
+            ->color('info')
+            ->form([
+                Forms\Components\TextInput::make('monto')
+                    ->label('Monto del Abono')
+                    ->numeric()
+                    ->required()
+                    ->prefix('$'),
+                Forms\Components\Select::make('metodo_pago')
+                    ->label('Método de Pago')
+                    ->options([
+                        'efectivo' => 'Efectivo',
+                        'transferencia' => 'Transferencia',
+                        'tarjeta' => 'Tarjeta',
+                    ])
+                    ->default('efectivo')
+                    ->required(),
+                Forms\Components\Textarea::make('notas')
+                    ->label('Notas / Comprobante')
+                    ->placeholder('Número de comprobante o detalles adicionales'),
             ])
+            ->action(function (Pedido $record, array $data): void {
+                $record->abonos()->create([
+                    'monto' => $data['monto'],
+                    'metodo_pago' => $data['metodo_pago'],
+                    'notas' => $data['notas'] ?? null,
+                ]);
+
+                \Filament\Notifications\Notification::make()
+                    ->title('Abono registrado correctamente')
+                    ->success()
+                    ->send();
+            }),
+    ])
+
+            
+                
+
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),

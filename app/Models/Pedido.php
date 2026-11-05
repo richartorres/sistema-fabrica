@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Abono;
 
 class Pedido extends Model
 {
@@ -23,5 +24,17 @@ class Pedido extends Model
     public function producto()
     {
         return $this->belongsTo(Producto::class);
+    }
+
+        public function abonos()
+    {
+        return $this->hasMany(Abono::class);
+    }
+
+    // Método útil para calcular el saldo pendiente
+    public function getSaldoPendienteAttribute()
+    {
+        $totalAbonado = $this->abonos()->sum('monto');
+        return $this->precio_total - $totalAbonado;
     }
 }
