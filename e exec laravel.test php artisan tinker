@@ -1,0 +1,18 @@
+[90m= [39m[34;4mIlluminate\Http\JsonResponse[39;24m {#8676
+    +[1mheaders[22m: [34;4mSymfony\Component\HttpFoundation\ResponseHeaderBag[39;24m {#8675},
+    +[1moriginal[22m: [
+      [34m"[39m[34mmessage[39m[34m"[39m => [32m"[39m[32mPedido registrado exitosamente[39m[32m"[39m,
+      [34m"[39m[34mpedido[39m[34m"[39m => [34;4mApp\Models\Pedido[39;24m {#8679
+        [34mcliente_id[39m: [35m1[39m,
+        [34mproducto_id[39m: [35m1[39m,
+        [34mcantidad[39m: [35m5[39m,
+        [34mprecio_unitario[39m: [35m450000.0[39m,
+        [34mprecio_total[39m: [35m2250000.0[39m,
+        [34mestado[39m: [32m"[39m[32mpendiente[39m[32m"[39m,
+        [34mupdated_at[39m: [32m"[39m[32m2026-11-05 14:07:44[39m[32m"[39m,
+        [34mcreated_at[39m: [32m"[39m[32m2026-11-05 14:07:44[39m[32m"[39m,
+        [34mid[39m: [35m1[39m,
+      },
+    ],
+    +[1mexception[22m: [36mnull[39m,
+  }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Producto;
+use App\Models\OrdenProduccion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -37,10 +38,25 @@ class ProduccionController extends Controller
                     $insumo->save();
                 }
 
+                // 3. Calcular costos de producción
+                $costoUnitario = $producto->costo_produccion;
+                $costoTotal = $costoUnitario * $cantidadProducida;
+
+                // 4. Registrar la Orden de Producción histórica
+                $orden = OrdenProduccion::create([
+                    'producto_id' => $producto->id,
+                    'cantidad_producida' => $cantidadProducida,
+                    'costo_unitario_produccion' => $costoUnitario,
+                    'costo_total_produccion' => $costoTotal,
+                ]);
+
                 return response()->json([
-                    'message' => 'Producción registrada y stock descontado exitosamente',
+                    'message' => 'Producción registrada, stock descontado y orden generada exitosamente',
                     'producto' => $producto->nombre,
-                    'cantidad_fabricada' => $cantidadProducida
+                    'cantidad_fabricada' => $cantidadProducida,
+                    'costo_unitario' => $costoUnitario,
+                    'costo_total_produccion' => $costoTotal,
+                    'orden_id' => $orden->id
                 ], 201);
             });
 
