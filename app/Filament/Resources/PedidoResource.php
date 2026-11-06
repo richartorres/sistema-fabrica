@@ -129,9 +129,16 @@ class PedidoResource extends Resource
                         'pagado' => 'success',
                     }),
 
-                Tables\Columns\TextColumn::make('precio_total')
-                    ->label('Total')
+                // CORREGIDO: Usamos 'precio_total' en lugar de 'total' y calculamos el saldo restando los abonos reales
+                Tables\Columns\TextColumn::make('precio_total')                
+                    ->label('Total / Saldo')
                     ->money('COP')
+                    ->description(function (Pedido $record): string {
+                        $totalAbonado = $record->abonos()->sum('monto');
+                        $saldoPendiente = $record->precio_total - $totalAbonado;
+                        
+                        return 'Saldo: COP ' . number_format($saldoPendiente, 2, ',', '.');
+                    })
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('created_at')
