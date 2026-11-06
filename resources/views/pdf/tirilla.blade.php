@@ -61,9 +61,21 @@
 
     <div class="line"></div>
 
-    <div class="center bold" style="font-size: 14px;">
-        TOTAL: $ {{ number_format($pedido->precio_total, 0, ',', '.') }}
-    </div>
+    <!-- Desglose Financiero Actualizado -->
+    <table class="table">
+        <tr>
+            <td><strong>TOTAL:</strong></td>
+            <td class="right">$ {{ number_format($pedido->precio_total, 0, ',', '.') }}</td>
+        </tr>
+        <tr>
+            <td><strong>ABONADO:</strong></td>
+            <td class="right">$ {{ number_format($pedido->abonos->sum('monto'), 0, ',', '.') }}</td>
+        </tr>
+        <tr>
+            <td><strong>SALDO:</strong></td>
+            <td class="right"><strong>$ {{ number_format($pedido->saldo_pendiente, 0, ',', '.') }}</strong></td>
+        </tr>
+    </table>
 
     <div class="line"></div>
     <div class="center" style="font-size: 10px;">
