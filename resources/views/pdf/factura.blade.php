@@ -10,7 +10,6 @@
         .details, .table { width: 100%; margin-bottom: 20px; border-collapse: collapse; }
         .table th, .table td { border: 1px solid #cbd5e0; padding: 8px; text-align: left; }
         .table th { background-color: #f7fafc; }
-        .total { text-align: right; font-size: 16px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -20,19 +19,19 @@
     </div>
 
     <table class="details">
-            <tr>
-                <td><strong>Pedido #:</strong> {{ $pedido->id }}</td>
-                <td><strong>Fecha:</strong> {{ $pedido->created_at->format('d/m/Y H:i') }}</td>
-            </tr>
-            <tr>
-                <td><strong>Cliente:</strong> {{ $pedido->cliente->nombre ?? 'N/A' }}</td>
-                <td><strong>Entrega Prometida:</strong> {{ $pedido->fecha_entrega_prometida ?? 'Por definir' }}</td>
-            </tr>
-            <tr>
-                <td><strong>Estado Producción:</strong> {{ ucfirst($pedido->estado) }}</td>
-                <td><strong>Estado Pago:</strong> {{ ucfirst($pedido->estado_pago ?? 'Pendiente') }}</td>
-            </tr>
-        </table></table>
+        <tr>
+            <td><strong>Pedido #:</strong> {{ $pedido->id }}</td>
+            <td><strong>Fecha:</strong> {{ $pedido->created_at->format('d/m/Y H:i') }}</td>
+        </tr>
+        <tr>
+            <td><strong>Cliente:</strong> {{ $pedido->cliente->nombre ?? 'N/A' }}</td>
+            <td><strong>Entrega Prometida:</strong> {{ $pedido->fecha_entrega_prometida ?? 'Por definir' }}</td>
+        </tr>
+        <tr>
+            <td><strong>Estado Producción:</strong> {{ ucfirst($pedido->estado) }}</td>
+            <td><strong>Estado Pago:</strong> {{ ucfirst($pedido->estado_pago ?? 'Pendiente') }}</td>
+        </tr>
+    </table>
 
     <table class="table">
         <thead>
@@ -53,6 +52,22 @@
         </tbody>
     </table>
 
-    <p class="total">Total a Pagar: $ {{ number_format($pedido->precio_total, 2) }}</p>
+    <!-- Totales y Abonos -->
+    <div style="margin-top: 20px; float: right; width: 300px;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td style="padding: 5px; text-align: left;"><strong>Total a Pagar:</strong></td>
+                <td style="padding: 5px; text-align: right;">$ {{ number_format($pedido->precio_total, 2) }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 5px; text-align: left;"><strong>Total Abonado:</strong></td>
+                <td style="padding: 5px; text-align: right; color: green;">$ {{ number_format($pedido->abonos->sum('monto'), 2) }}</td>
+            </tr>
+            <tr style="border-top: 1px solid #000;">
+                <td style="padding: 5px; text-align: left;"><strong>Saldo Pendiente:</strong></td>
+                <td style="padding: 5px; text-align: right; color: red;">$ {{ number_format($pedido->saldo_pendiente, 2) }}</td>
+            </tr>
+        </table>
+    </div>
 </body>
 </html>

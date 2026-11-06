@@ -170,7 +170,20 @@ class PedidoResource extends Resource
                     ->label('Monto del Abono')
                     ->numeric()
                     ->required()
-                    ->prefix('$'),
+                    ->prefix('$')
+                    ->rules([
+                        function ($record) {
+                            return function (string $attribute, $value, \Closure $fail) use ($record) {
+                                // Calculamos el saldo pendiente actual del pedido
+                                $totalAbonado = $record->abonos()->sum('monto');
+                                $saldoPendiente = $record->precio_total - $totalAbonado;
+
+                                if ($value > $saldoPendiente) {
+                                    $fail("El abono no puede superar el saldo pendiente de \$ " . number_format($saldoPendiente, 0, ',', '.'));
+                                }
+                            };
+                        },
+                    ]),
                 Forms\Components\Select::make('metodo_pago')
                     ->label('Método de Pago')
                     ->options([
