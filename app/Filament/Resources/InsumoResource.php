@@ -121,4 +121,9 @@ class InsumoResource extends Resource
             'edit' => Pages\EditInsumo::route('/{record}/edit'),
         ];
     }
+
+        public static function canViewAny(): bool
+    {
+        return auth()->user()?->hasRole('Administrador') ?? false;
+    }
 }

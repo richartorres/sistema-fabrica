@@ -9,6 +9,11 @@ class Pedido extends Model
 {
     protected $fillable = [
         'cliente_id',
+        'vendedor_id',
+        'estado_pedido',
+        'estado_pago',
+        'fecha_entrega_prometida',
+        'notas_produccion',
         'producto_id',
         'cantidad',
         'precio_unitario',
@@ -29,6 +34,12 @@ class Pedido extends Model
         public function abonos()
     {
         return $this->hasMany(Abono::class);
+    }
+
+        // Relación con el usuario que registró la venta
+    public function vendedor()
+    {
+        return $table->belongsTo(User::class, 'vendedor_id');
     }
 
     // Método útil para calcular el saldo pendiente

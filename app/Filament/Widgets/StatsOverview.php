@@ -9,6 +9,13 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class StatsOverview extends BaseWidget
 {
+
+    public static function canView(): bool
+    {
+        // Solo el Administrador puede ver las estadísticas financieras
+        return auth()->user()?->hasRole('Administrador') ?? false;
+    }
+
     protected function getStats(): array
     {
         // 1. Ventas Totales de todos los pedidos registrados
@@ -37,4 +44,6 @@ class StatsOverview extends BaseWidget
                 ->color($saldoPendiente < 0 ? 'danger' : 'warning'),
         ];
     }
+
+        
 }

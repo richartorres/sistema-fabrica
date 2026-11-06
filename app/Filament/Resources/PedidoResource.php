@@ -9,6 +9,9 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Textarea;
+use Illuminate\Database\Eloquent\Builder;
 
 class PedidoResource extends Resource
 {
@@ -31,8 +34,8 @@ class PedidoResource extends Resource
                             ->preload()
                             ->required(),
 
-                        Forms\Components\DatePicker::make('fecha_entrega_prometida')
-                            ->label('Fecha de Entrega Compromiso')
+                        DateTimePicker::make('fecha_entrega_prometida')
+                            ->label('Fecha y Hora de Entrega Compromiso')
                             ->default(now()->addDays(3))
                             ->required(),
                     ])->columns(2),
@@ -61,7 +64,7 @@ class PedidoResource extends Resource
                             ->required(),
                     ])->columns(2),
 
-                Forms\Components\Section::make('Totales')
+                Forms\Components\Section::make('Totales y Detalles')
                     ->schema([
                         Forms\Components\TextInput::make('precio_total')
                             ->label('Monto Total ($)')
@@ -69,23 +72,26 @@ class PedidoResource extends Resource
                             ->prefix('$')
                             ->required(),
 
-                Forms\Components\TextInput::make('cantidad')
+                        Forms\Components\TextInput::make('cantidad')
                             ->label('Cantidad')
                             ->numeric()
                             ->default(1)
                             ->required(),
 
-                 
-                Forms\Components\TextInput::make('precio_unitario')
+                        Forms\Components\TextInput::make('precio_unitario')
                             ->label('Precio Unitario ($)')
                             ->numeric()
                             ->prefix('$')
-                            ->required(),            
-
+                            ->required(),
 
                         Forms\Components\Textarea::make('notas')
                             ->label('Notas de Fabricación')
                             ->placeholder('Ej: Colchón 1.40x1.90 en tela Jacquard color gris, pilo adicional.')
+                            ->columnSpanFull(),
+
+                        Textarea::make('notas_produccion')
+                            ->label('Notas Especiales para Planta')
+                            ->placeholder('Detalles de tela, color de costura, medidas especiales...')
                             ->columnSpanFull(),
                     ]),
             ]);
@@ -123,7 +129,7 @@ class PedidoResource extends Resource
                         'pagado' => 'success',
                     }),
 
-                Tables\Columns\TextColumn::make('total')
+                Tables\Columns\TextColumn::make('precio_total')
                     ->label('Total')
                     ->money('COP')
                     ->sortable(),
@@ -146,74 +152,67 @@ class PedidoResource extends Resource
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
                 Tables\Actions\Action::make('descargar_pdf')
-            ->label('PDF')
-            ->icon('heroicon-o-document-arrow-down')
-            ->color('success')
-            ->url(fn (Pedido $record): string => route('pedidos.pdf', $record))
-            ->openUrlInNewTab(),
+                    ->label('PDF')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->color('success')
+                    ->url(fn (Pedido $record): string => route('pedidos.pdf', $record))
+                    ->openUrlInNewTab(),
 
                 Tables\Actions\Action::make('descargar_tirilla')
-            ->label('Tirilla')
-            ->icon('heroicon-o-receipt-percent')
-            ->color('warning')
-            ->url(fn (Pedido $record): string => route('pedidos.tirilla', $record))
-            ->openUrlInNewTab(),
+                    ->label('Tirilla')
+                    ->icon('heroicon-o-receipt-percent')
+                    ->color('warning')
+                    ->url(fn (Pedido $record): string => route('pedidos.tirilla', $record))
+                    ->openUrlInNewTab(),
 
-            
+                Tables\Actions\Action::make('registrar_abono')
+                    ->label('Abonar')
+                    ->icon('heroicon-o-currency-dollar')
+                    ->color('info')
+                    ->form([
+                        Forms\Components\TextInput::make('monto')
+                            ->label('Monto del Abono')
+                            ->numeric()
+                            ->required()
+                            ->prefix('$')
+                            ->rules([
+                                function ($record) {
+                                    return function (string $attribute, $value, \Closure $fail) use ($record) {
+                                        $totalAbonado = $record->abonos()->sum('monto');
+                                        $saldoPendiente = $record->precio_total - $totalAbonado;
 
-            Tables\Actions\Action::make('registrar_abono')
-            ->label('Abonar')
-            ->icon('heroicon-o-currency-dollar')
-            ->color('info')
-            ->form([
-                Forms\Components\TextInput::make('monto')
-                    ->label('Monto del Abono')
-                    ->numeric()
-                    ->required()
-                    ->prefix('$')
-                    ->rules([
-                        function ($record) {
-                            return function (string $attribute, $value, \Closure $fail) use ($record) {
-                                // Calculamos el saldo pendiente actual del pedido
-                                $totalAbonado = $record->abonos()->sum('monto');
-                                $saldoPendiente = $record->precio_total - $totalAbonado;
-
-                                if ($value > $saldoPendiente) {
-                                    $fail("El abono no puede superar el saldo pendiente de \$ " . number_format($saldoPendiente, 0, ',', '.'));
-                                }
-                            };
-                        },
-                    ]),
-                Forms\Components\Select::make('metodo_pago')
-                    ->label('Método de Pago')
-                    ->options([
-                        'efectivo' => 'Efectivo',
-                        'transferencia' => 'Transferencia',
-                        'tarjeta' => 'Tarjeta',
+                                        if ($value > $saldoPendiente) {
+                                            $fail("El abono no puede superar el saldo pendiente de \$ " . number_format($saldoPendiente, 0, ',', '.'));
+                                        }
+                                    };
+                                },
+                            ]),
+                        Forms\Components\Select::make('metodo_pago')
+                            ->label('Método de Pago')
+                            ->options([
+                                'efectivo' => 'Efectivo',
+                                'transferencia' => 'Transferencia',
+                                'tarjeta' => 'Tarjeta',
+                            ])
+                            ->default('efectivo')
+                            ->required(),
+                        Forms\Components\Textarea::make('notas')
+                            ->label('Notas / Comprobante')
+                            ->placeholder('Número de comprobante o detalles adicionales'),
                     ])
-                    ->default('efectivo')
-                    ->required(),
-                Forms\Components\Textarea::make('notas')
-                    ->label('Notas / Comprobante')
-                    ->placeholder('Número de comprobante o detalles adicionales'),
+                    ->action(function (Pedido $record, array $data): void {
+                        $record->abonos()->create([
+                            'monto' => $data['monto'],
+                            'metodo_pago' => $data['metodo_pago'],
+                            'notas' => $data['notas'] ?? null,
+                        ]);
+
+                        \Filament\Notifications\Notification::make()
+                            ->title('Abono registrado correctamente')
+                            ->success()
+                            ->send();
+                    }),
             ])
-            ->action(function (Pedido $record, array $data): void {
-                $record->abonos()->create([
-                    'monto' => $data['monto'],
-                    'metodo_pago' => $data['metodo_pago'],
-                    'notas' => $data['notas'] ?? null,
-                ]);
-
-                \Filament\Notifications\Notification::make()
-                    ->title('Abono registrado correctamente')
-                    ->success()
-                    ->send();
-            }),
-    ])
-
-            
-                
-
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
@@ -235,5 +234,17 @@ class PedidoResource extends Resource
             'create' => Pages\CreatePedido::route('/create'),
             'edit' => Pages\EditPedido::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        $user = auth()->user();
+
+        if ($user && $user->hasRole('Vendedor')) {
+            return $query->where('vendedor_id', $user->id);
+        }
+
+        return $query;
     }
 }

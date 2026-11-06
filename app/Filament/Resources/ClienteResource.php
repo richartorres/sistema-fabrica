@@ -9,9 +9,27 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+
+
 
 class ClienteResource extends Resource
 {
+
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        $user = auth()->user();
+
+        if ($user && $user->hasRole('Vendedor')) {
+            return $query->where('vendedor_id', $user->id);
+        }
+
+        return $query;
+    }
+
+
     protected static ?string $model = Cliente::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
@@ -28,7 +46,11 @@ class ClienteResource extends Resource
 
                 Forms\Components\TextInput::make('documento')
                     ->label('NIT / Cédula')
-                    ->maxLength(50),
+                    ->maxLength(50)
+                    ->unique(ignoreRecord: true) // 👈 Evita duplicados en la BD
+                    ->validationMessages([
+                        'unique' => 'Este número de documento ya se encuentra registrado en el sistema.',
+                        ]),
 
                 Forms\Components\TextInput::make('telefono')
                     ->label('Teléfono')
@@ -101,4 +123,11 @@ class ClienteResource extends Resource
             'edit' => Pages\EditCliente::route('/{record}/edit'),
         ];
     }
+
+        public static function canViewAny(): bool
+    {
+        return auth()->user()?->hasAnyRole(['Administrador', 'Vendedor']) ?? false;
+    }
+
+ 
 }

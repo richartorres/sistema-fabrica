@@ -8,9 +8,13 @@ class Dashboard extends BaseDashboard
 {
     public function getWidgets(): array
     {
-        return [
-            \App\Filament\Widgets\StatsOverview::class,
-        ];
+        if (auth()->user()?->hasRole('Administrador')) {
+            return [
+                \App\Filament\Widgets\StatsOverview::class,
+            ];
+        }
+
+        return [];
     }
 
     protected function getHeaderWidgets(): array
